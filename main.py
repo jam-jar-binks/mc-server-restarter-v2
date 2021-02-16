@@ -150,18 +150,18 @@ async def serverdown():
 async def backup():
     print('Backing up')
     await stop()
-    rawTime = time.localtime(time.time())
-    ints = [rawTime.tm_year,rawTime.tm_mon,rawTime.tm_mday,rawTime.tm_hour,rawTime.tm_min,rawTime.tm_sec]
-    string_time = [str(int) for int in ints]
-    preIntTime = "".join(string_time)
-    current_time = int(preIntTime)
+    burawTime = time.localtime(time.time())
+    buints = [rawTime.tm_year,rawTime.tm_mon,rawTime.tm_mday,rawTime.tm_hour,rawTime.tm_min,rawTime.tm_sec]
+    bustring_time = [str(int) for int in ints]
+    bupreIntTime = "".join(string_time)
+    bucurrent_time = int(preIntTime)
 
-    print(current_time)
+    print("backing up at " + bucurrent_time)
 
     copyFrom = pathlib.Path(r"" + world)
     preCopyTo = pathlib.Path(r"" + backups)
 
-    copyTo = os.path.join(preCopyTo, str(current_time))
+    copyTo = os.path.join(preCopyTo, str(bucurrent_time))
     shutil.copytree(copyFrom, copyTo)
     print("Backup Complete")
     
