@@ -131,10 +131,10 @@ async def on_ready():
     await start()
     await timer()
 
-# starts the mc server, requires run.bat
+# starts the mc server
 async def start():
     print ("starting minecraft server")
-    subprocess.Popen([os.path.join(server, "run.bat")], stdin=None, stdout=None, stderr=None, close_fds=True)
+    subprocess.Popen("java -Xmx1024M -Xms1024M -jar server.jar", stdin=None, stdout=None, stderr=None, close_fds=True, shell=True)
     print("make sure the .jar file of your server is "server.jar", else the server will not start!")
     channel = client.get_channel(channelid)
     await channel.send(pingid + " SERVER IS UP")
