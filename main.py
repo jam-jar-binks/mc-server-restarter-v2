@@ -7,29 +7,13 @@ import shutil
 import os, sys
 from datetime import datetime
 import configparser
+import pathlib
 
 
-#ask a y/n are you sure? with an error reset. this has to be defined here bc reasons
-def ask_user():
-    check = str(input("(Y/N): ")).lower().strip()
-    try:
-        if check[:1] == 'y':
-            return True
-        elif check[:1] == 'n':
-            return False
-        else:
-            print('Invalid Input')
-            return ask_user()
-    except Exception as error:
-        print("Please enter valid inputs")
-        print(error)
-        return ask_user()
-
-
-#index of varibles
+#index of varibles of things that don't need oredered activation
 config = configparser.ConfigParser()
-
-
+now = datetime.now()
+client = discord.Client()
 
 
 #creating the config
@@ -37,7 +21,11 @@ config = configparser.ConfigParser()
 if os.path.isfile('mcServerRestartConfig.ini') != True:
     print ("No config found, creating one.")
     
-    config['SERVER'] = {'ServerPath': ""}
+    config['SERVER'] = {'ServerDir': "",
+                        'BackupPath': "",
+                        'ServerJar': "server.jar",
+                        'WorldFolderName': "world"}
+    
     config['DISCORDSETTINGS'] = {'DiscordChannelId': '000000000000000001',
                                  'RoleToPing': '<@&000000000000000001>'}
 
@@ -57,35 +45,61 @@ else:
     serverSettings = config['SERVER']
     discordSettings = config['DISCORDSETTINGS']
     rconSettings = config['RCONSETTINGS']
-    if serverSettings["ServerPath"] == "":
-        print('You need to set the server directory! exiting in 5 seconds')
+    
+    #making sure things are set up right
+    if serverSettings["ServerDir"] == "":
+        print('You need to set the config for server path! exiting in 5 seconds')
         time.sleep(5)
         exit()
         
+    if serverSettings["BackupPath"] == "":
+        print('You need to set the config for backup path! exiting in 5 seconds')
+        time.sleep(5)
+        exit()
+        
+    if os.path.isfile(os.path.join(server, serverSettings["ServerJar"])) != True:
+        print(os.path.join(server, serverSettings["ServerJar"]))
+        print('Cannot find the file specified, please check again! exiting in 5 seconds')
+        time.sleep(5)
+        exit()
+        
+    if os.path.isdir(os.path.join(server, serverSettings["WorldFolderName"])):
+        print('Cannot find the folder specified, please check again! exiting in 5 seconds')
+        time.sleep(5)
+        exit()
+        
+
     if discordSettings["DiscordChannelId"] == '000000000000000001' or discordSettings["RoleToPing"] == '<@&000000000000000001>':
         print('You need to set either the Channel id or the role to ping id! use \#channel or \@role in discord chat to get the ids! exiting in ten seconds')
         time.sleep(10)
         exit()
 
     if rconSettings["RconPassword"] == 'aGoodPassword':
-        print('You have not set the rcon password to a different one than default. This may cause problems!')
+        print('You have not set the rcon password to a different one than default.')
         time.sleep(1)
 
     if rconSettings["RconServerPort"] == '25575':
         print('You are using the default Rcon port')
 
 
-server = serverSettings["ServerPath"]
-        
+server = serverSettings["ServerDir"]
+backups = serverSettings["BackupPath"]
+world = os.path.join(server, serverSettings["WorldFolderName"])
+
 channelid = int(discordSettings["DiscordChannelId"])
 pingid = discordSettings["RoleToPing"]
 
 rconpwd = rconSettings["RconPassword"]
 rconport = int(rconSettings["RconServerPort"])
 
-print("Server directory is {}".format(serverSettings["ServerPath"]))
+print("Server directory is {}".format(serverSettings["ServerDir"]))
+print("Backup directory is {}".format(serverSettings["BackupPath"]))
+print("Server .Jar file is {}".format(serverSettings["ServerJar"]))
+print("World folder is named {}".format(serverSettings["WorldFolderName"]))
+
 print("Channel Id is {}".format(discordSettings["DiscordChannelId"]))
 print("Role to ping is {}".format(discordSettings["RoleToPing"]))
+
 print("Rcon password is {}".format(rconSettings["RconPassword"]))
 print("Rcon server port is {}".format(rconSettings["RconServerPort"]))
 time.sleep(5)
@@ -100,18 +114,17 @@ if os.path.isfile('backup.bat') != True:
     leave = ask_user()
     if leave: exit()
     
-now = datetime.now()
+
 
 #server = os.getcwd()
 
-backups = os.path.join(server, "World backups")
-world = os.path.join(server, "world")
+
 print(world)
 
-client = discord.Client()
 
 
-#the main program
+
+#the main program starter, only runs once the discord bot is ready, ie, after the client.run() is done.
 @client.event
 async def on_ready():
     print("Bot online")
@@ -137,7 +150,19 @@ async def serverdown():
 async def backup():
     print('Backing up')
     await stop()
-    subprocess.call([os.path.join(server, "backup.bat")])
+    rawTime = time.localtime(time.time())
+    ints = [rawTime.tm_year,rawTime.tm_mon,rawTime.tm_mday,rawTime.tm_hour,rawTime.tm_min,rawTime.tm_sec]
+    string_time = [str(int) for int in ints]
+    preIntTime = "".join(string_time)
+    current_time = int(preIntTime)
+
+    print(current_time)
+
+    copyFrom = pathlib.Path(r"" + world)
+    preCopyTo = pathlib.Path(r"" + backups)
+
+    copyTo = os.path.join(preCopyTo, str(current_time))
+    shutil.copytree(copyFrom, copyTo)
     print("Backup Complete")
     
     
@@ -182,8 +207,21 @@ async def timer():
             await start()
             time.sleep(10)
         
-    
-
+#ask a y/n are you sure? with an error reset.
+def ask_user():
+    check = str(input("(Y/N): ")).lower().strip()
+    try:
+        if check[:1] == 'y':
+            return True
+        elif check[:1] == 'n':
+            return False
+        else:
+            print('Invalid Input')
+            return ask_user()
+    except Exception as error:
+        print("Please enter valid inputs")
+        print(error)
+        return ask_user()
 
 '''
 @client.event
