@@ -151,10 +151,10 @@ async def backup():
     print('Backing up')
     await stop()
     burawTime = time.localtime(time.time())
-    buints = [rawTime.tm_year,rawTime.tm_mon,rawTime.tm_mday,rawTime.tm_hour,rawTime.tm_min,rawTime.tm_sec]
-    bustring_time = [str(int) for int in ints]
-    bupreIntTime = "".join(string_time)
-    bucurrent_time = int(preIntTime)
+    buints = [burawTime.tm_year,burawTime.tm_mon,burawTime.tm_mday,burawTime.tm_hour,burawTime.tm_min,burawTime.tm_sec]
+    bustring_time = [str(int) for int in buints]
+    bupreIntTime = "".join(bustring_time)
+    bucurrent_time = int(bupreIntTime)
 
     print("backing up at " + bucurrent_time)
 
