@@ -9,23 +9,35 @@ from datetime import datetime
 import configparser
 
 
+#ask a y/n are you sure? with an error reset. this has to be defined here bc reasons
+def ask_user():
+    check = str(input("(Y/N): ")).lower().strip()
+    try:
+        if check[:1] == 'y':
+            return True
+        elif check[:1] == 'n':
+            return False
+        else:
+            print('Invalid Input')
+            return ask_user()
+    except Exception as error:
+        print("Please enter valid inputs")
+        print(error)
+        return ask_user()
+
+
 #index of varibles
 config = configparser.ConfigParser()
 
-now = datetime.now()
 
-server = os.getcwd()
-print(server)
 
-backups = os.path.join(server, "World backups")
-world = os.path.join(server, "world")
-print(world)
 
-client = discord.Client()
 #creating the config
 
 if os.path.isfile('mcServerRestartConfig.ini') != True:
     print ("No config found, creating one.")
+    
+    config['SERVER'] = {'ServerPath': ""}
     config['DISCORDSETTINGS'] = {'DiscordChannelId': '000000000000000001',
                                  'RoleToPing': '<@&000000000000000001>'}
 
@@ -41,9 +53,15 @@ if os.path.isfile('mcServerRestartConfig.ini') != True:
 else:
     print ("Config found!")
     config.read("mcServerRestartConfig.ini")
+    
+    serverSettings = config['SERVER']
     discordSettings = config['DISCORDSETTINGS']
     rconSettings = config['RCONSETTINGS']
-
+    if serverSettings["ServerPath"] == "":
+        print('You need to set the server directory! exiting in 5 seconds')
+        time.sleep(5)
+        exit()
+        
     if discordSettings["DiscordChannelId"] == '000000000000000001' or discordSettings["RoleToPing"] == '<@&000000000000000001>':
         print('You need to set either the Channel id or the role to ping id! use \#channel or \@role in discord chat to get the ids! exiting in ten seconds')
         time.sleep(10)
@@ -57,13 +75,15 @@ else:
         print('You are using the default Rcon port')
 
 
+server = serverSettings["ServerPath"]
+        
+channelid = int(discordSettings["DiscordChannelId"])
+pingid = discordSettings["RoleToPing"]
 
-channelid = int(discordSettings["DiscordChannelId"])#'809087383067951144'
-pingid = discordSettings["RoleToPing"]#'<@&809086423181164564>'
+rconpwd = rconSettings["RconPassword"]
+rconport = int(rconSettings["RconServerPort"])
 
-rconpwd = rconSettings["RconPassword"] #'retcon'
-rconport = int(rconSettings["RconServerPort"]) #25575
-
+print("Server directory is {}".format(serverSettings["ServerPath"]))
 print("Channel Id is {}".format(discordSettings["DiscordChannelId"]))
 print("Role to ping is {}".format(discordSettings["RoleToPing"]))
 print("Rcon password is {}".format(rconSettings["RconPassword"]))
@@ -77,9 +97,19 @@ if os.path.isfile('run.bat') != True:
     exit()
 if os.path.isfile('backup.bat') != True:
     print('backup.bat not found, this is very likely to cause problems cause problems, exit?')
-    if input("Are you sure? (y/n): ").lower().strip()[:1] == "y":
-        exit()
+    leave = ask_user()
+    if leave: exit()
     
+now = datetime.now()
+
+#server = os.getcwd()
+
+backups = os.path.join(server, "World backups")
+world = os.path.join(server, "world")
+print(world)
+
+client = discord.Client()
+
 
 #the main program
 @client.event
