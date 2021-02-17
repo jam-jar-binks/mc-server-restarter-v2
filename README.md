@@ -1,11 +1,6 @@
 # mc-server-restarter-v2
-put all files into the root directory of your minecraft server. ie. right next to server.jar
+make sure to name your server .jar server.jar
 
-make sure you have both run.bat and backup.bat in the same directory
+run.bat or some other start way to start the server must be in the server directory
 
-MAKE SURE YOUR SERVER JAR FILE IS CALLED "server.jar"
-
-MAKE SURE THE WORLD FILE IS CALLED "world"
-
-THIS NEEDS TO BE IN THE SAME DIRECTORY AS BOTH THESE FILES
-
+you must configure the config before you can use this program. the config will be generated on first run.
