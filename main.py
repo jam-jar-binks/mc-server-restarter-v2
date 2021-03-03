@@ -210,7 +210,7 @@ async def timer():
         #ping the server to see if it is offline.
         with Client('127.0.0.1', rconport, passwd=rconpwd) as client: 
             basic_stats = client.stats()            # Get basic stats.
-            print(basic_stats)
+        print(basic_stats)
         
         
         
@@ -264,7 +264,7 @@ async def on_message(message):
 @client.event
 async def serverdied():
     channel = client.get_channel(channelid)
-    await channel.send(pingid + " THE SERVER JUST DIED")
+    await channel.send(pingid + " RESTARTING THE SERVER")
     
 
 
