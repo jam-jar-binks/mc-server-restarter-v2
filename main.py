@@ -2,7 +2,8 @@ import discord
 import asyncio
 import time
 import subprocess
-from mcipc.rcon.je import Biome, Client     
+from mcipc.rcon.je import Biome, Client    
+from mcipc.query import Client
 import shutil    
 import os
 import sys
@@ -150,7 +151,7 @@ async def start():
     subprocess.Popen([os.path.join(server, serverSettings["ServerStartFile"])], stdin=None, stdout=None, stderr=None, close_fds=True)
     print("make sure the .jar file of your server is server.jar, else the server will not start!")
     channel = client.get_channel(channelid)
-    await channel.send(pingid + " SERVER IS UP")
+    await channel.send(pingid + " SERVER IS UP") #do a funky errorcode check with rcon
     time.sleep(10)
     
 # say the server is down on the discord channel
@@ -206,6 +207,14 @@ async def timer():
     while True:
         time.sleep(1740) #waits 1,740 (29 minutes) seconds to check if the time is right
         
+        #ping the server to see if it is offline.
+        with Client('127.0.0.1', rconport, passwd=rconpwd) as client: 
+            basic_stats = client.stats()            # Get basic stats.
+            print(basic_stats)
+        
+        
+        
+        
         rawTime = time.localtime(time.time())
         ints = [rawTime.tm_hour,rawTime.tm_min,rawTime.tm_sec]
         string_time = [str(int) for int in ints]
@@ -248,6 +257,9 @@ async def on_message(message):
         channel = client.get_channel(809087383067951144)
         await channel.send("<@&809086423181164564> BRO THE SERVER JUST DIED!!11!1!11!1")
 '''
+
+
+
 # wip crash alerter, nothing calls it yet
 @client.event
 async def serverdied():
